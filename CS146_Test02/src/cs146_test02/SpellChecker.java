@@ -10,9 +10,10 @@ import java.util.ArrayList;
  * @author Christian
  */
 public class SpellChecker {
-
+    
     DictionaryHashTable dict;
     private Scanner in;
+    private final static String letters = "qwertyuiopasdfghjklzxcvbnm'-";
 
     /**
      * Instantiates a SpellChecker from a specified DictionaryHashTable object.
@@ -63,27 +64,48 @@ public class SpellChecker {
                 Scanner lineIn = new Scanner(in.nextLine());
                 lineIn.useDelimiter(" ");
                 String word = lineIn.next();
-                if (!dict.exists(word.toLowerCase()))
+                if (!dict.exists(word.toLowerCase())) {
                     errors.add(new Error(word, line));
+                }
             }
+            for (Error e : errors) {
+                checkSubsitutions(e);
+                checkDeletions(e);
+                P.pp("Line " + e.line + ": " + e.value);
+                if (e.suggestions.size() > 0) {
+                    P.p(" - Suggestions: ");
+                    for (String s : e.suggestions) {
+                        P.p(s + " ");
+                    }
+                } else {
+                    P.p(" Can not find any suggestions for the misspelled word.");
+                }
+            }
+            
         } catch (FileNotFoundException e) {
             System.out.println("File not found.");
         }
     }
-
+    
     private void checkSubsitutions(Error e) {
-        for(int i = 0; i < e.value.length() ; i++ )
-        {
-            String w = e.value.substring(i) + e.value.substring(0, i);
-            for(int j = 0; j <= 24; j++)
-            {
-                Character c = new Character();
-                c.
+        
+        for (int i = 0; i < e.value.length(); i++) {
+            for (int j = 0; j <= letters.length(); j++) {
+                String p = e.value.substring(i) + letters.charAt(j) + e.value.substring(0, i);
+                if (!p.equals(e.value) && dict.exists(p)) {
+                    e.suggestions.add(p);
+                }
             }
         }
     }
-
+    
     private void checkDeletions(Error e) {
-
+        for (int i = 0; i < e.value.length(); i++) {
+            String p = e.value.substring(i) + e.value.substring(0, i);
+            if (!p.equals(e.value) && dict.exists(p)) {
+                e.suggestions.add(p);
+            }
+        }
+        
     }
 }
